@@ -1,3 +1,7 @@
+databases:
+  - name: browser-automation-db   # durable metrics store
+    plan: free
+
 services:
   - type: web
     name: browser-automation
@@ -30,5 +34,12 @@ services:
         sync: false
       - key: WEX_SF_AUTH_URL
         sync: false
+      # Durable metrics — internal connection string (private network) + no TLS.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: browser-automation-db
+          property: connectionString
+      - key: PGSSL
+        value: disable
       # PORT auto-injected by Render — do not set manually.
       # No Browserless: default is local Chromium (bundled in the Docker image).

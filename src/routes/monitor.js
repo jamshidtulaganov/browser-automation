@@ -10,8 +10,10 @@ const metrics = require('../core/metrics');
 
 const router = Router();
 
-router.get('/metrics', verifyApiKey, (req, res) => {
-    res.json({ success: true, ...metrics.snapshot() });
+router.get('/metrics', verifyApiKey, async (req, res, next) => {
+    try {
+        res.json({ success: true, ...(await metrics.snapshot()) });
+    } catch (e) { next(e); }
 });
 
 router.get('/monitor', (req, res) => {
