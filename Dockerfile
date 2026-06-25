@@ -3,8 +3,10 @@
 # so Chromium is NEVER downloaded on deploy (unlike a Node-runtime service).
 FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
-# Use the image's built-in browser path (/ms-playwright) instead of node_modules.
-ENV PLAYWRIGHT_BROWSERS_PATH=
+# Use the image's pre-installed browsers at /ms-playwright. (Setting this to an
+# empty string sends Playwright to node_modules/.local-browsers — which is empty
+# because we install with --ignore-scripts — and Chromium launch then fails.)
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 WORKDIR /app
 
