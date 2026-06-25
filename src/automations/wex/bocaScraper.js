@@ -353,22 +353,30 @@ class WexBocaScraper extends BaseScraper {
                     ? modal.locator('label:has-text("Comments") ~ div textarea').first()
                     : modal.locator('textarea').first();
 
-                // Comments is a plain visible textarea (confirmed live). Click to focus,
-                // pressSequentially to type (fires native input events), read-back to verify.
+                // Comments is an Aura uiInput "supportInputTextArea". Typing alone makes
+                // the textarea SHOW the text (and read-back returns it), but Aura only
+                // persists its value model on input/change/blur — without firing those the
+                // task saves with an EMPTY Comments. So after typing we dispatch
+                // input+change and blur to force Aura to commit before Save.
                 await commentsArea.waitFor({ state: 'visible', timeout: 8000 });
-                await commentsArea.click();
-                await commentsArea.pressSequentially(comments, { delay: 30 });
-                await this.page.waitForTimeout(150);
-                let filled = await commentsArea.inputValue().catch(() => null)
-                    ?? await commentsArea.evaluate(el => el.value || el.textContent || '').catch(() => '');
+                const typeAndCommit = async (delay) => {
+                    await commentsArea.click();
+                    await commentsArea.evaluate(el => { el.value = ''; });
+                    await commentsArea.pressSequentially(comments, { delay });
+                    await this.page.waitForTimeout(120);
+                    await commentsArea.evaluate(el => {
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                        el.blur();
+                    });
+                    await this.page.waitForTimeout(120);
+                    return (await commentsArea.inputValue().catch(() => ''))
+                        || (await commentsArea.evaluate(el => el.value || '').catch(() => ''));
+                };
+                let filled = await typeAndCommit(30);
                 if (!filled || !filled.includes('BOCA')) {
                     console.warn('[WexBocaScraper] Comments read-back empty — retrying with slower type');
-                    await commentsArea.evaluate(el => { el.value = ''; });
-                    await commentsArea.click();
-                    await commentsArea.pressSequentially(comments, { delay: 60 });
-                    await this.page.waitForTimeout(200);
-                    filled = await commentsArea.inputValue().catch(() => '')
-                        ?? await commentsArea.evaluate(el => el.value || '').catch(() => '');
+                    filled = await typeAndCommit(60);
                 }
                 if (!filled || !filled.includes('BOCA')) {
                     throw new Error('[comments] empty after fill — value not committed to textarea');
