@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: browser-automation
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    branch: main  # human: set to the branch you deploy from
+    region: oregon  # human: match your other services' region
+    plan: starter   # human: free / starter / standard / pro
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      # Own API key — servercrm must send this as x-api-key. Generate a new secret.
+      - key: API_KEY
+        sync: false
+      # WEX Community scraper login (same values as servercrm's scraper account).
+      - key: WEX_USERNAME_SCRAPER
+        sync: false
+      - key: WEX_PASSWORD_SCRAPER
+        sync: false
+      # Salesforce auth — resolves appId → record id / status / owner (SOQL).
+      - key: SF_WEX_CLIENT_KEY
+        sync: false
+      - key: SF_WEX_CLIENT_SECRET
+        sync: false
+      - key: SF_WEX_USER
+        sync: false
+      - key: SF_WEX_USER_PASSWORD
+        sync: false
+      - key: SF_WEX_SECURITY_CODE
+        sync: false
+      - key: WEX_SF_AUTH_URL
+        sync: false
+      # PORT auto-injected by Render — do not set manually.
+      # No Browserless: default is local Chromium (bundled in the Docker image).
