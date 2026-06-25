@@ -51,6 +51,7 @@ function aggregate(rows) {
     const automations = [...map.values()].map(c => ({
         name: c.name, runs: c.runs, success: c.success, failure: c.failure,
         avgMs: c.runs ? Math.round(c.totalMs / c.runs) : 0,
+        totalMs: c.totalMs,
         lastMs: c.lastMs, lastAt: c.lastAt, lastStatus: c.lastStatus,
     })).sort((a, b) => b.runs - a.runs);
     const totals = automations.reduce((t, a) => {
@@ -71,6 +72,7 @@ function snapshot() {
     const automations = [...counters.entries()].map(([name, c]) => ({
         name, runs: c.runs, success: c.success, failure: c.failure,
         avgMs: c.runs ? Math.round(c.totalMs / c.runs) : 0,
+        totalMs: c.totalMs,
         lastMs: c.lastMs, lastAt: c.lastAt, lastStatus: c.lastStatus,
     })).sort((a, b) => b.runs - a.runs);
     const totals = automations.reduce((t, a) => {
