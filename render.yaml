@@ -1,7 +1,3 @@
-databases:
-  - name: browser-automation-db   # durable metrics store
-    plan: free
-
 services:
   - type: web
     name: browser-automation
@@ -9,9 +5,14 @@ services:
     dockerfilePath: ./Dockerfile
     branch: main  # human: set to the branch you deploy from
     region: oregon  # human: match your other services' region
-    plan: starter   # human: free / starter / standard / pro
+    plan: starter   # human: free / starter / standard / pro (disk needs a paid plan)
     autoDeploy: true
     healthCheckPath: /health
+    # Persistent disk for the embedded metrics store (survives restarts/redeploys).
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
     envVars:
       # Own API key — servercrm must send this as x-api-key. Generate a new secret.
       - key: API_KEY
@@ -34,12 +35,8 @@ services:
         sync: false
       - key: WEX_SF_AUTH_URL
         sync: false
-      # Durable metrics — internal connection string (private network) + no TLS.
-      - key: DATABASE_URL
-        fromDatabase:
-          name: browser-automation-db
-          property: connectionString
-      - key: PGSSL
-        value: disable
+      # Embedded metrics store writes here (mounted persistent disk above).
+      - key: DATA_DIR
+        value: /data
       # PORT auto-injected by Render — do not set manually.
       # No Browserless: default is local Chromium (bundled in the Docker image).

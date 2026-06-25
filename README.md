@@ -40,7 +40,7 @@ All endpoints except `/health` and `/` require the `x-api-key` header.
 |---|---|---|
 | GET  | `/health` | Render health check |
 | GET  | `/monitor` | Dashboard: per-automation usage counts + recent-run log (asks for the API key once) |
-| GET  | `/metrics` | JSON usage metrics (totals, per-automation runs/success/fail/avg, recent runs). Durable when `DATABASE_URL` is set, else in-memory (`durable` flag in the response). |
+| GET  | `/metrics` | JSON usage metrics (totals, per-automation runs/success/fail/avg, recent runs). Durable via the embedded file store when `DATA_DIR` is a persistent disk, else in-memory (`durable` flag in the response). |
 | GET  | `/automations` | List registered automations |
 | POST | `/run/:name` | Run any automation by name (body = params) |
 | POST | `/wex/boca` or `/wex/boca/:appId` | Create a BOCA task on a WEX application |
