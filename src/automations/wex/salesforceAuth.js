@@ -35,11 +35,13 @@ async function getWexSalesforceToken() {
         });
     } catch (err) {
         const detail = err.response?.data ? JSON.stringify(err.response.data) : err.message;
-        throw new Error(`WEX Salesforce auth HTTP error: ${detail}`);
+        console.error('[WexSF] auth HTTP error:', detail);   // details to server log only
+        throw new Error('WEX Salesforce auth failed (see server logs)');
     }
 
     if (!res.data.access_token) {
-        throw new Error(`WEX Salesforce auth failed: ${JSON.stringify(res.data)}`);
+        console.error('[WexSF] auth response missing access_token:', JSON.stringify(res.data));
+        throw new Error('WEX Salesforce auth failed (see server logs)');
     }
 
     _token       = res.data.access_token;

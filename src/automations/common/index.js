@@ -5,19 +5,13 @@
 // (screenshot/pdf) are returned as base64.
 
 const { withBrowser } = require('../../core/withBrowser');
-const { badRequest } = require('../../core/httpError');
-
-function requireUrl(params) {
-    const url = params && params.url ? String(params.url) : '';
-    if (!/^https?:\/\//i.test(url)) throw badRequest('a valid http(s) url is required');
-    return url;
-}
+const { assertSafeUrl } = require('../../core/ssrfGuard');
 
 const screenshot = {
     name: 'screenshot',
     description: 'Navigate to a URL and return a PNG screenshot (base64).',
     async run(params = {}) {
-        const url = requireUrl(params);
+        const url = await assertSafeUrl(params.url);
         return withBrowser(async ({ page }) => {
             await page.goto(url, { waitUntil: params.waitUntil || 'networkidle' });
             if (params.waitForSelector) await page.waitForSelector(params.waitForSelector, { timeout: 30000 });
@@ -31,7 +25,7 @@ const pdf = {
     name: 'pdf',
     description: 'Navigate to a URL and return a PDF (base64).',
     async run(params = {}) {
-        const url = requireUrl(params);
+        const url = await assertSafeUrl(params.url);
         return withBrowser(async ({ page }) => {
             await page.goto(url, { waitUntil: params.waitUntil || 'networkidle' });
             const buf = await page.pdf({ format: params.pageFormat || 'A4', printBackground: true });
@@ -44,7 +38,7 @@ const extract = {
     name: 'extract',
     description: 'Navigate to a URL and return text content (optionally scoped to a selector).',
     async run(params = {}) {
-        const url = requireUrl(params);
+        const url = await assertSafeUrl(params.url);
         return withBrowser(async ({ page }) => {
             await page.goto(url, { waitUntil: params.waitUntil || 'networkidle' });
             if (params.selector) {
