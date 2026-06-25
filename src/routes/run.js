@@ -5,7 +5,6 @@
 const { Router } = require('express');
 const { verifyApiKey } = require('../middleware/auth');
 const registry = require('../registry');
-const { HttpError } = require('../core/httpError');
 
 const router = Router();
 
@@ -15,10 +14,8 @@ router.get('/automations', verifyApiKey, (req, res) => {
 
 router.post('/run/:name', verifyApiKey, async (req, res, next) => {
     try {
-        const automation = registry.get(req.params.name);
-        if (!automation) throw new HttpError(404, `Unknown automation: ${req.params.name}`);
-        const result = await automation.run(req.body || {});
-        res.json({ success: true, automation: automation.name, ...result });
+        const result = await registry.runAutomation(req.params.name, req.body || {});
+        res.json({ success: true, automation: req.params.name, ...result });
     } catch (e) { next(e); }
 });
 
