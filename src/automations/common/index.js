@@ -5,7 +5,7 @@
 // (screenshot/pdf) are returned as base64.
 
 const { withBrowser } = require('../../core/withBrowser');
-const { assertSafeUrl } = require('../../core/ssrfGuard');
+const { assertSafeUrl, installRequestGuard } = require('../../core/ssrfGuard');
 
 const screenshot = {
     name: 'screenshot',
@@ -13,6 +13,7 @@ const screenshot = {
     async run(params = {}) {
         const url = await assertSafeUrl(params.url);
         return withBrowser(async ({ page }) => {
+            await installRequestGuard(page);
             await page.goto(url, { waitUntil: params.waitUntil || 'networkidle' });
             if (params.waitForSelector) await page.waitForSelector(params.waitForSelector, { timeout: 30000 });
             const buf = await page.screenshot({ fullPage: params.fullPage !== false });
@@ -27,6 +28,7 @@ const pdf = {
     async run(params = {}) {
         const url = await assertSafeUrl(params.url);
         return withBrowser(async ({ page }) => {
+            await installRequestGuard(page);
             await page.goto(url, { waitUntil: params.waitUntil || 'networkidle' });
             const buf = await page.pdf({ format: params.pageFormat || 'A4', printBackground: true });
             return { url, format: 'pdf', base64: buf.toString('base64') };
@@ -40,6 +42,7 @@ const extract = {
     async run(params = {}) {
         const url = await assertSafeUrl(params.url);
         return withBrowser(async ({ page }) => {
+            await installRequestGuard(page);
             await page.goto(url, { waitUntil: params.waitUntil || 'networkidle' });
             if (params.selector) {
                 const loc = page.locator(params.selector);

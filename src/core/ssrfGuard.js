@@ -24,10 +24,12 @@ function isPrivateIp(ipRaw) {
     }
     if (net.isIPv6(ip)) {
         const l = ip.toLowerCase();
-        if (l === '::1' || l === '::') return true;
-        if (l.startsWith('fe80')) return true;            // link-local
-        if (l.startsWith('fc') || l.startsWith('fd')) return true; // ULA fc00::/7
-        if (l.startsWith('ff')) return true;              // multicast
+        if (l === '::1' || l === '::') return true;        // loopback / unspecified
+        // first 16-bit group (compressed forms like "::x" → 0)
+        const fg = l.startsWith('::') ? 0 : parseInt(l.split(':')[0] || '0', 16);
+        if ((fg & 0xffc0) === 0xfe80) return true;         // link-local  fe80::/10
+        if ((fg & 0xfe00) === 0xfc00) return true;         // unique-local fc00::/7
+        if ((fg & 0xff00) === 0xff00) return true;         // multicast   ff00::/8
         return false;
     }
     return true; // unknown format → block
@@ -61,4 +63,25 @@ async function assertSafeUrl(rawUrl) {
     return u.toString();
 }
 
-module.exports = { assertSafeUrl, isPrivateIp };
+/**
+ * Re-validate every request the page makes (main-frame redirects AND subresources)
+ * so a safe initial URL can't redirect to — or pull resources from — an internal
+ * target. Aborts any request whose URL fails assertSafeUrl. Install BEFORE goto.
+ *
+ * Note: this re-resolves DNS per request, which narrows but does not fully close
+ * the DNS-rebinding (TOCTOU) window between resolution and socket connect. For
+ * untrusted callers, set AUTOMATION_URL_ALLOWLIST — the allowlist path skips DNS
+ * entirely and is the recommended hardening.
+ */
+async function installRequestGuard(page) {
+    await page.route('**/*', async (route) => {
+        try {
+            await assertSafeUrl(route.request().url());
+            await route.continue();
+        } catch (_) {
+            await route.abort('blockedbyclient');
+        }
+    });
+}
+
+module.exports = { assertSafeUrl, isPrivateIp, installRequestGuard };
