@@ -45,12 +45,17 @@ All endpoints except `/health` and `/` require the `x-api-key` header.
 | POST | `/run/:name` | Run any automation by name (body = params) |
 | POST | `/wex/boca` or `/wex/boca/:appId` | Create a BOCA task on a WEX application |
 | POST | `/wex/report` | Scrape the WEX "App Created — Today" report |
+| POST | `/wex/apps` | Search for WEX application by Company Name or App ID and submit close task |
 
 ### Examples
 ```bash
 # BOCA task (appId in path or body; assignedTo defaults to the application Owner)
 curl -X POST $URL/wex/boca/889510 -H "x-api-key: $KEY" -H "Content-Type: application/json" \
   -d '{"priority":"Normal","dueDate":"2026-06-30","status":"Not Started"}'
+
+# WEX Apps: close application by Company Name or App ID
+curl -X POST $URL/wex/apps -H "x-api-key: $KEY" -H "Content-Type: application/json" \
+  -d '{"companyName":"Acme Corp"}'
 
 # Generic: screenshot any URL (returns base64 PNG)
 curl -X POST $URL/run/screenshot -H "x-api-key: $KEY" -H "Content-Type: application/json" \

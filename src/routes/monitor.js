@@ -92,7 +92,8 @@ const SHELL='<div class="cards" id="cards"></div>'+
     '<div class="chartbox"><h3>Success / failure</h3><canvas id="cStatus" height="190"></canvas></div>'+
   '</div>'+
   '<h2>Automations</h2><div id="tblA"></div>'+
-  '<h2 id="recH">Recent runs</h2><div id="tblR"></div>';
+  '<h2 id="recH">Recent runs</h2><div id="tblR"></div>'+
+  '<h2>Endpoints</h2><div id="endpoints"></div>';
 function ensureShell(){ if(!$('#cards')) $('#app').innerHTML=SHELL; }
 const GRID='rgba(255,255,255,.06)', TICK='#8b97a7';
 function upsertBar(id,key,labels,data,color,fmt){
@@ -129,6 +130,12 @@ function render(d){
   if(!d.recent.length)r+='<tr><td colspan="5" class="sub">—</td></tr>';
   d.recent.forEach(x=>{r+='<tr><td class="sub">'+esc(new Date(x.ts).toLocaleTimeString())+'</td><td>'+esc(x.name)+'</td><td><span class="pill '+(x.ok?'ok':'bad')+'">'+(x.ok?'ok':'error')+'</span></td><td class="num">'+fmtMs(x.ms)+'</td><td class="err">'+esc(x.error||'')+'</td></tr>';});
   r+='</table>';$('#tblR').innerHTML=r;
+  let e='<table><tr><th>Method</th><th>Path</th><th>Purpose</th></tr>';
+  e+='<tr><td>POST</td><td>/wex/boca</td><td>Create BOCA task on WEX application</td></tr>';
+  e+='<tr><td>POST</td><td>/wex/report</td><td>Scrape WEX "App Created — Today" report</td></tr>';
+  e+='<tr><td>POST</td><td>/wex/apps</td><td>Search WEX app by Company Name/App ID and submit close task</td></tr>';
+  e+='<tr><td>POST</td><td>/run/:name</td><td>Run any automation by name</td></tr>';
+  e+='</table>';$('#endpoints').innerHTML=e;
   $('#meta').textContent='updated '+new Date(d.now).toLocaleTimeString();
 }
 async function load(){

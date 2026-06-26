@@ -27,4 +27,11 @@ router.post('/wex/report', verifyApiKey, async (req, res, next) => {
     } catch (e) { next(e); }
 });
 
+router.post('/wex/apps', verifyApiKey, async (req, res, next) => {
+    try {
+        const result = await registry.runAutomation('wex.apps', req.body || {});
+        res.json({ success: true, ...result });
+    } catch (e) { next(e); }
+});
+
 module.exports = router;

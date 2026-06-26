@@ -5,6 +5,7 @@
 
 const WexBocaScraper = require('./bocaScraper');
 const WexReportScraper = require('./reportScraper');
+const WexAppsScraper = require('./appsScraper');
 const { resolveApplication, dueDateInPast } = require('./application');
 const { badRequest } = require('../../core/httpError');
 
@@ -43,4 +44,13 @@ const report = {
     },
 };
 
-module.exports = [boca, report];
+const apps = {
+    name: 'wex.apps',
+    description: 'Search for WEX application by Company Name or App ID and submit a close task.',
+    async run(params = {}) {
+        const result = await new WexAppsScraper().closeApplication(params);
+        return result;
+    },
+};
+
+module.exports = [boca, report, apps];
