@@ -34,4 +34,12 @@ router.post('/wex/apps', verifyApiKey, async (req, res, next) => {
     } catch (e) { next(e); }
 });
 
+router.post('/wex/application/:appId/close', verifyApiKey, async (req, res, next) => {
+    try {
+        const params = { ...req.body || {}, appId: req.params.appId };
+        const result = await registry.runAutomation('wex.close', params);
+        res.json({ success: true, ...result });
+    } catch (e) { next(e); }
+});
+
 module.exports = router;
