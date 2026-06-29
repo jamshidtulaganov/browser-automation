@@ -34,4 +34,12 @@ router.post('/wex/apps', verifyApiKey, async (req, res, next) => {
     } catch (e) { next(e); }
 });
 
+// C-29: fetch WEX application details by appId (no browser scrape — SF lookup only).
+router.get('/wex/application/:appId', verifyApiKey, async (req, res, next) => {
+    try {
+        const result = await registry.runAutomation('wex.application', { appId: req.params.appId });
+        res.json({ success: true, ...result });
+    } catch (e) { next(e); }
+});
+
 module.exports = router;

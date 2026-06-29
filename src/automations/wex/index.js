@@ -53,4 +53,26 @@ const apps = {
     },
 };
 
-module.exports = [boca, report, apps];
+// C-29: resolve a WEX application by appId (SF lookup only — no browser scrape).
+const application = {
+    name: 'wex.application',
+    description: 'Fetch WEX application details (status, owner) by numeric appId via Salesforce.',
+    async run(params = {}) {
+        const appIdRaw = params.appId;
+        const appId = appIdRaw != null
+            ? String(appIdRaw).replace(/^Application-/i, '').replace(/\D/g, '')
+            : '';
+        if (!appId) throw badRequest('appId is required');
+        const rec = await resolveApplication(appId);
+        if (!rec) return { appId, found: false };
+        return {
+            appId,
+            found:       true,
+            sfRecordId:  rec.sfRecordId,
+            status:      rec.sfStatus,
+            ownerName:   rec.ownerName,
+        };
+    },
+};
+
+module.exports = [boca, report, apps, application];
