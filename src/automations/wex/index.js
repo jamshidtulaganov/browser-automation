@@ -4,6 +4,7 @@
 // (owns SF lookup + browser flow). Registered into the global registry.
 
 const WexBocaScraper = require('./bocaScraper');
+const WexCloseScraper = require('./closeScraper');
 const WexReportScraper = require('./reportScraper');
 const WexAppsScraper = require('./appsScraper');
 const { resolveApplication, dueDateInPast } = require('./application');
@@ -53,4 +54,30 @@ const apps = {
     },
 };
 
-module.exports = [boca, report, apps];
+const close = {
+    name: 'wex.close',
+    description: 'Close a WEX application by numeric app ID (resolves SF record, navigates directly, submits "Close Application" task).',
+    async run(params = {}) {
+        const appIdRaw = params.appId;
+        const appId = appIdRaw != null
+            ? String(appIdRaw).replace(/^Application-/i, '').replace(/\D/g, '')
+            : '';
+        if (!appId) throw badRequest('appId is required');
+        if (dueDateInPast(params.dueDate)) throw badRequest('dueDate must not be in the past.');
+
+        const rec = await resolveApplication(appId);
+        if (!rec) return { appId, found: false, action: 'skipped' };
+
+        const task = {
+            assignedTo: params.assignedTo != null ? String(params.assignedTo) : rec.ownerName,
+            status:     params.status     != null ? String(params.status)     : undefined,
+            priority:   params.priority   != null ? String(params.priority)   : undefined,
+            dueDate:    params.dueDate    != null ? String(params.dueDate)    : undefined,
+        };
+        console.log(`[wex.close] app=${appId} sfId=${rec.sfRecordId} owner="${task.assignedTo}" status="${rec.sfStatus}"`);
+        const result = await new WexCloseScraper().sendClose(appId, rec.sfRecordId, rec.sfStatus, task);
+        return { appId, found: true, status: rec.sfStatus, ...result };
+    },
+};
+
+module.exports = [boca, close, report, apps];
