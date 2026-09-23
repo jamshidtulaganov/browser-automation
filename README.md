@@ -46,6 +46,7 @@ All endpoints except `/health` and `/` require the `x-api-key` header.
 | POST | `/wex/boca` or `/wex/boca/:appId` | Create a BOCA task on a WEX application |
 | POST | `/wex/report` | Scrape the WEX "App Created — Today" report |
 | POST | `/wex/apps` | Search for WEX application by Company Name or App ID and submit close task |
+| POST | `/loves/token` | Mint the Auth0 ID token for Love's Shop Connect by driving its login page (cached ~24h; body `{ "force": true }` re-logs in). Answers `{ idToken, expiresAt, cached }` — the Mytrion Ops Maintenance poller's bearer. |
 
 ### Examples
 ```bash
@@ -63,7 +64,7 @@ curl -X POST $URL/run/screenshot -H "x-api-key: $KEY" -H "Content-Type: applicat
 ```
 
 ## Env
-See `.env.example`. Required: `API_KEY`; for WEX: `WEX_USERNAME_SCRAPER`,
+See `.env.example`. Required: `API_KEY`; for Love's: `LOVES_PORTAL_LOGIN`, `LOVES_PORTAL_PASSWORD`; for WEX: `WEX_USERNAME_SCRAPER`,
 `WEX_PASSWORD_SCRAPER`, and the Salesforce set (`SF_WEX_CLIENT_KEY`,
 `SF_WEX_CLIENT_SECRET`, `SF_WEX_USER`, `SF_WEX_USER_PASSWORD`,
 `SF_WEX_SECURITY_CODE`, `WEX_SF_AUTH_URL`).

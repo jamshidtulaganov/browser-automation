@@ -4,11 +4,12 @@
 // Each automation is { name, description?, run(params) }.
 
 const wex = require('./automations/wex');
+const loves = require('./automations/loves');
 const common = require('./automations/common');
 const metrics = require('./core/metrics');
 const { HttpError } = require('./core/httpError');
 
-const all = [...wex, ...common];
+const all = [...wex, ...loves, ...common];
 
 const byName = new Map();
 for (const a of all) {

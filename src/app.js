@@ -11,6 +11,7 @@ app.use(express.json({ limit: '2mb' }));
 app.use(require('./routes/health'));
 app.use(require('./routes/monitor'));
 app.use(require('./routes/wex'));
+app.use(require('./routes/loves'));
 app.use(require('./routes/run'));
 
 app.use(errorHandler);

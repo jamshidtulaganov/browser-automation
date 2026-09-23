@@ -35,6 +35,11 @@ services:
         sync: false
       - key: WEX_SF_AUTH_URL
         sync: false
+      # Love's Shop Connect fleet login — POST /loves/token mints the Mytrion Ops poller's bearer.
+      - key: LOVES_PORTAL_LOGIN
+        sync: false
+      - key: LOVES_PORTAL_PASSWORD
+        sync: false
       # Embedded metrics store writes here (mounted persistent disk above).
       - key: DATA_DIR
         value: /data
